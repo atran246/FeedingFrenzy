@@ -6,12 +6,12 @@ var DIR_DOWN = 3;
 enchant();
 
 window.onload = function() {
-    var game = new Core(640, 640);
+    var game = new Game(640, 640);
     game.fps = 16;
     game.preload('http://enchantjs.com/assets/images/map0.gif', 'Fish.png');
 
     game.onload = function() {
-        var bg = new Sprite(640, 640);
+        var bg = new Sprite(640,640);
         var maptip = game.assets['http://enchantjs.com/assets/images/map0.gif'];
         var image = new Surface(640, 640);
 
@@ -28,65 +28,80 @@ window.onload = function() {
 
         bg.image = image;
         game.rootScene.addChild(bg);
-
+        game.touched = false;
+        
         //create fish
         var fish = new Sprite(63, 47);
         fish.image = game.assets['Fish.png'];
-        fish.x = 320 - 16;
-        fish.y = 320 - 16;
+        fish.x = 320;
+        fish.y = 320;
         fish.frame = 1;
 
-        fish.toX = fish.x;
-        fish.toY = fish.y;
+        fish.toX = 0;
+        fish.toY = 0;
+        fish.anim = [2, 3, 6, 8];
         game.rootScene.addChild(fish);
 
 
-        fish.addEventListener(Event.ENTER_FRAME, function() {
+        /* fish.addEventListener(Event.ENTER_FRAME, function() {
             if (fish.y > fish.toY) {
                 fish.dir = DIR_UP;
-                if (Math.abs(fish.y - fish.toY) < 6) {
-                    fish.y = fish.toY;
-                } else {
-                    fish.y -= 6;
-                }
+                move_towards_point(e.pageX, e.pageY,5);
             } else if (fish.y < fish.toY) {
                 fish.dir = DIR_DOWN;
-                if (Math.abs(fish.y - fish.toY) < 6) {
-                    fish.y = fish.toY;
-                } else {
-                    fish.y += 6;
+                move_towards_point(e.pageX, mouse_y,5);
                 }
-            }
-            if (fish.x > fish.toX) {
+            
+            else if (fish.x > fish.toX) {
                 fish.dir = DIR_LEFT;
-                if (Math.abs(fish.x - fish.toX) < 6) {
-                    fish.x = fish.toX;
-                } else {
-                    fish.x -= 6;
-                }
+                move_towards_point(e.pageX, e.pageY,5);
             } else if (fish.x < fish.toX) {
                 fish.dir = DIR_RIGHT;
-                if (Math.abs(fish.x - fish.toX) < 6) {
-                    fish.x = fish.toX;
-                } else {
-                    fish.x += 6;
+                move_towards_point(e.pageX, e.pageY,5);
                 }
+           
+            //if (fish.x == fish.toX && fish.y == fish.toY) fish.age = 1;
+            fish.frame = fish.anim[fish.dir + (fish.age % 4)];
+        });
+*/
+
+        //create enemy fish
+        Enemy = Class.create(Sprite,{
+            initialize:function(){
+                Sprite.call(this, 63, 47);
+                this.image = game.assets['Fish.png'];
+                game.rootScene.addChild(this);
+            }  
+        });
+        
+        enemy = new Enemy();
+        enemy.x = 0;
+        enemy.y = 320;
+        enemy.frame = 6;
+
+        
+        
+        
+        enemy.addEventListener(Event.ENTER_FRAME, function() {
+            if (enemy.intersect(fish)){
+                game.rootScene.removeChild(enemy);
+                enemy.x = -160;
+                enemy.y = 70;
+                game.rootScene.addChild(enemy);
+            } else if (enemy.x < 700){
+                enemy.x += 15;
+            } else {
+                enemy.x = -20;
             }
-
-            if (fish.x == fish.toX && fish.y == fish.toY) fish.age = 1;
-            //fish.frame = fish.anim[fish.dir * 4 + (fish.age % 4)];
+            });
+        
+        
+        window.addEventListener("mousemove", function(e) {
+            fish.x = 2 * e.pageX - 30;
+            fish.y = 2 * e.pageY - 30;
         });
-
-
-        bg.addEventListener(Event.TOUCH_END, function(e) {
-            fish.toX = e.x - 16;
-            fish.toY = e.y - 16;
-        });
-
-        bg.addEventListener(Event.TOUCH_MOVE, function(e) {
-            fish.toX = e.x - 16;
-            fish.toY = e.y - 16;
-        });
-    };
+        
+    };    
     game.start();
+    
 };
