@@ -1,4 +1,6 @@
+* {cursor: none;}
+
 html, body{
-    margin: 0;
+    margin: auto;
     padding: 0;
 }
