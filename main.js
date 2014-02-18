@@ -26,14 +26,22 @@ window.onload = function() {
 
         bg.image = image;
         game.rootScene.addChild(bg);
- 
-        
+		
+		game.score = 0;
+		scoreLabel = new Label("Score: ");
+		scoreLabel.addEventListener('enterframe', function(){
+			this.text = "Score:"+game.score;
+		});
+        scoreLabel.x = 550;
+		scoreLabel.color = "black";
+		game.rootScene.addChild(scoreLabel);
+		
         //create fish
         var fish = new Sprite(63, 47);
         fish.image = game.assets['Assets/Fish.png'];
         fish.x = 320;
         fish.y = 320;
-        fish.frame = 1;
+        fish.frame = 0;
 
         fish.toX = 320;
         fish.toY = 320;
@@ -60,36 +68,60 @@ window.onload = function() {
         }); */
 
 
+		function getRandomInt (min, max) {
+			return Math.floor(Math.random() * (max - min + 1)) + min;
+		}
+		
         //create enemy fish
-        Enemy = Class.create(Sprite,{
+        var enemy = enchant.Class.create(enchant.Sprite,{
             initialize:function(){
-                Sprite.call(this, 63, 47);
+                enchant.Sprite.call(this, 63, 47);
                 this.image = game.assets['Assets/Fish.png'];
-				this.x = 0;
+				this.x = getRandomInt(-300,-25);
 				this.y = Math.floor(Math.random() * 640) - 23;
+				this.frame = Math.floor(Math.random() * 7) + 1;
+				this.scale(Math.random() * 2.5)
+				
+				this.addEventListener(Event.ENTER_FRAME, function() {
+					if (this.intersect(fish)){
+						game.score += 1;
+						fish.scale (1.01, 1.01);
+						game.rootScene.removeChild(this);
+						//this.x = -160;
+						//this.y = Math.floor(Math.random() * 640) - 23;
+						//this.frame = Math.floor(Math.random() * 7) + 1; 
+						//game.rootScene.addChild(this);
+						new enemy();
+					} else if (this.x < 700){
+						this.x += 15;
+					} else {
+						this.x = getRandomInt(-300, -25);
+						this.y = Math.floor(Math.random() * 640) - 23;
+					}
+				});
                 game.rootScene.addChild(this);
             }  
         });
         
-        enemy = new Enemy();
-        enemy.frame = 7;
-		
+		enemy1 = new enemy();
+		enemy2 = new enemy();
+		enemy3 = new enemy();
 
-        
-        enemy.addEventListener(Event.ENTER_FRAME, function() {
-            if (enemy.intersect(fish)){
-                game.rootScene.removeChild(enemy);
-                enemy.x = -160;
-                enemy.y = Math.floor(Math.random() * 640) - 23;
-                game.rootScene.addChild(enemy);
-            } else if (enemy.x < 700){
-                enemy.x += 15;
-            } else {
-                enemy.x = -20;
-				enemy.y = Math.floor(Math.random() * 640) - 23;
-            }
-            });
-        
+        fish.addEventListener(Event.ENTER_FRAME, function() {
+			if(fish.x > 640-63){
+				fish.x = 640-63;
+			}
+			else if(fish.x < 0){
+				fish.x = 0;
+			}
+			else if(fish.y < 0){
+				fish.y = 0;
+			}
+			else if(fish.y > 640-47/2){
+				fish.y = 640 - 47;
+			}
+			
+		});
         
         window.addEventListener("mousemove", function(e) {
             fish.x = e.pageX;
